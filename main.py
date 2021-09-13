@@ -1,9 +1,8 @@
-from requests.models import Response
 import os
-from types import resolve_bases
 import requests
 import base64
-from requests.api import head, request
+from requests.api import head
+
 import urllib3
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
@@ -58,6 +57,16 @@ def get_headers():
         }
     return headers
 
+def get_store():
+  response = requests.get(f"https://pd.{region}.a.pvp.net/store/v2/storefront/{puuid}", headers=headers, verify=False)
+  store_info = response.json()
+  # returns skin levels uuid. use https://valorant-api.com/v1/weapons/skinlevels/uuid for more info
+  single_item_offers = store_info['SkinsPanelLayout']['SingleItemOffers']
+  print(single_item_offers)
 
-lockfile = get_lockfile()
+puuid = ''
 headers = {}
+lockfile = get_lockfile()
+get_headers()
+region = get_region()
+get_store()
