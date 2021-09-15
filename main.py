@@ -1,6 +1,8 @@
 import os
 import requests
 import base64
+import pprint
+import logging
 from requests.api import head
 
 import urllib3
@@ -57,12 +59,56 @@ def get_headers():
         }
     return headers
 
+
+def get_content(region):
+    response = requests.get(
+        f"https://shared.{region}.a.pvp.net/content-service/v2/content", headers=headers, verify=False)
+    return response.json()
+
+
+def get_latest_season_id(content):
+    for season in content["Seasons"]:
+        if season["IsActive"]:
+            return season["ID"]
+
+
 def get_store():
-  response = requests.get(f"https://pd.{region}.a.pvp.net/store/v2/storefront/{puuid}", headers=headers, verify=False)
-  store_info = response.json()
-  # returns skin levels uuid. use https://valorant-api.com/v1/weapons/skinlevels/uuid for more info
-  single_item_offers = store_info['SkinsPanelLayout']['SingleItemOffers']
-  print(single_item_offers)
+    response = requests.get(
+        f"https://pd.{region}.a.pvp.net/store/v2/storefront/{puuid}", headers=headers, verify=False)
+    store_info = response.json()
+    # returns skin levels uuid. use https://valorant-api.com/v1/weapons/skinlevels/uuid for more info
+    single_item_offers = store_info['SkinsPanelLayout']['SingleItemOffers']
+
+
+def get_player_mmr(region, player_id, seasonID):
+    response = requests.get(
+        f"https://pd.{region}.a.pvp.net/mmr/v1/players/{player_id}", headers=headers, verify=False)
+    try:
+        if response.ok:
+            print("Rank gotten successfully.")
+            r = response.json()
+            rankTIER = r["QueueSkills"]["competitive"]["SeasonalInfoBySeasonID"][seasonID]["CompetitiveTier"]
+            print(rankTIER)
+            if int(rankTIER) >= 21:
+                rank = [rankTIER,
+                        r["QueueSkills"]["competitive"]["SeasonalInfoBySeasonID"][seasonID]["RankedRating"],
+                        r["QueueSkills"]["competitive"]["SeasonalInfoBySeasonID"][seasonID]["LeaderboardRank"],
+                        ]
+            elif int(rankTIER) not in (0, 1, 2, 3):
+                rank = [rankTIER,
+                        r["QueueSkills"]["competitive"]["SeasonalInfoBySeasonID"][seasonID]["RankedRating"],
+                        0,
+                        ]
+            else:
+                rank = [0, 0, 0]
+        else:
+            print("failed getting rank")
+            rank = [0, 0, 0]
+    except TypeError:
+        rank = [0, 0, 0]
+    except KeyError:
+        rank = [0, 0, 0]
+    return [rank]
 
 puuid = ''
 headers = {}
@@ -70,3 +116,7 @@ lockfile = get_lockfile()
 get_headers()
 region = get_region()
 get_store()
+content = get_content(region)
+seasonID = get_latest_season_id(content)
+rank = get_player_mmr(region, puuid, seasonID)
+print(rank)
