@@ -108,7 +108,7 @@ def get_player_mmr(region, player_id, seasonID):
         rank = [0, 0, 0]
     except KeyError:
         rank = [0, 0, 0]
-    return [rank]
+    return rank
 
 puuid = ''
 headers = {}
