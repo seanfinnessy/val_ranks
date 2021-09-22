@@ -1,7 +1,10 @@
 import json
 from flask import Flask, jsonify
 from requests.api import get
-from config import get_player_mmr, region, puuid, seasonID, get_lockfile, get_headers, get_region, get_content, get_latest_season_id, get_player_name
+from config import (
+    get_player_mmr, region, puuuid_list, seasonID, get_lockfile, get_headers, get_region, get_content, get_latest_season_id, 
+    get_player_name, number_to_ranks, map_in_ongoing_match, game_mode_in_ongoing_match
+)
 
 app = Flask(__name__)
 
@@ -10,12 +13,13 @@ def get_hello():
     return jsonify({"Hello":"World"})
     
 @app.route('/rank', methods=['GET'])
-def get_rank_of_user():
+def get_match_details():
     list = []
-    list_of_puuid_in_lobby = [puuid]
-    for i in list_of_puuid_in_lobby:
+    list.append({"GameMode": game_mode_in_ongoing_match, "Map": map_in_ongoing_match})
+    for i in puuuid_list:
         player_name = get_player_name(region, i)
         rank = get_player_mmr(region, i, seasonID)
+        rank["Current Rank"] = number_to_ranks[rank["Current Rank"]]
         player_name["RankInfo"] = rank
         list.append(player_name)
     return jsonify(list)
@@ -25,13 +29,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-{
-    "Current Rank": 22,
-    "GameName": "2FACED",
-    "RankInfo": {
-        "Leaderboard": 4609,
-    "Rank Rating": 99,
-    "TagLine": "s4ke"
-    }
-}

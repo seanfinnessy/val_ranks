@@ -130,8 +130,6 @@ def get_match_id(region, puuid):
             r = response.json()
             subject = r["Subject"]
             match_id = r["MatchID"]
-            print("Subject:" + subject)
-            print("MatchID:" + match_id)
             return match_id
         else:
             print("Could not find active game.")
@@ -144,12 +142,52 @@ def get_ongoing_match(region, match_id):
     try:
         if response.ok:
             r = response.json()
-            print(r)
+            return r
         else:
             print("Could not find active game.")
     except requests.exceptions.RequestException as e:
         print('Error retrieving game')
         raise SystemExit(e)
+
+number_to_ranks = [
+        'Unrated',
+        'Unrated',
+        'Unrated',
+        'Iron 1',
+        'Iron 2',
+        'Iron 3',
+        'Bronze 1',
+        'Bronze 2',
+        'Bronze 3',
+        'Silver 1',
+        'Silver 2',
+        'Silver 3',
+        'Gold 1',
+        'Gold 2',
+        'Gold 3',
+        'Platinum 1',
+        'Platinum 2',
+        'Platinum 3',
+        'Diamond 1',
+        'Diamond 2',
+        'Diamond 3',
+        'Immortal 1',
+        'Immortal 2',
+        'Immortal 3',
+        'Radiant'
+    ]
+
+map_puuids = {
+    "Ascent": "7eaecc1b-4337-bbf6-6ab9-04b8f06b3319",
+    "Bonsai": "d960549e-485c-e861-8d71-aa9d1aed12a2",
+    "Canyon": "b529448b-4d60-346e-e89e-00a4c527a405",
+    "Duality": "2c9d57ec-4431-9c5e-2939-8f9ef6dd5cba",
+    "Foxtrot": "2fb9a4fd-47b8-4e7d-a969-74b4046ebd53",
+    "Port": "e2ad5c54-4114-a870-9641-8ea21279579a",
+    "Range": "ee613ee9-28b7-4beb-9666-08db13bb2244",
+    "Triad": "2bee0dc9-4ffe-519b-1cbd-7fbe763a6047"
+}
+
 puuid = ''
 headers = {}
 lockfile = get_lockfile()
@@ -160,3 +198,22 @@ seasonID = get_latest_season_id(content)
 player_name = get_player_name(region, puuid)
 match_id = get_match_id(region, puuid)
 ongoing_match_details = get_ongoing_match(region, match_id)
+players_in_ongoing_match = ongoing_match_details["Players"]
+map_in_ongoing_match = str(ongoing_match_details["MapID"]).rsplit("/", 1)[1]
+
+map_puuidin_ongoing_match = map_puuids[map_in_ongoing_match]
+print(map_puuidin_ongoing_match)
+
+if ongoing_match_details["ProvisioningFlow"] == "CustomGame":
+    game_mode_in_ongoing_match = "Custom"
+else:
+    game_mode_in_ongoing_match = ongoing_match_details["MatchmakingData"]["QueueID"]
+
+
+puuuid_list = []
+for i in ongoing_match_details["Players"]:
+    puuuid_list.append(i["Subject"])
+
+mmr_list = []
+for puuid in puuuid_list:
+    mmr_list.append(get_player_mmr(region, puuid, seasonID))
