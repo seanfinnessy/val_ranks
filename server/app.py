@@ -41,7 +41,7 @@ def get_match_details():
     # Get all PUUIDs in lobby
     puuid_list = []
     for player in players_in_ongoing_match:
-        puuid_list.append(player["Subject"])
+        puuid_list.append(player["Subject"]) #TODO: Add in CharacterID to get the agent the user is playing
         
     # New match details obj
     match_details = dict()
@@ -59,6 +59,7 @@ def get_match_details():
 
     match_details["player_details"] = list
     return jsonify(match_details)
+
 def main():
     app.run(debug=True)
 
