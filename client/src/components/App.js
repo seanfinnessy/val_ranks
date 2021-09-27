@@ -1,16 +1,11 @@
-import React, { useEffect } from 'react'
+import React from 'react'
 import { Container } from '@mui/material'
 import { BrowserRouter, Route } from 'react-router-dom'
 import { connect } from 'react-redux';
-import * as actions from '../actions/';
 
 import Landing from './Landing'
 
-const App = ({ fetchPlayers }) => {
-  useEffect(() => {
-    fetchPlayers();
-  })
-
+const App = () => {
   return (
     <Container maxWidth="lg">
         <BrowserRouter>
@@ -22,4 +17,4 @@ const App = ({ fetchPlayers }) => {
   )
 }
 
-export default connect(null, actions)(App);
+export default connect(null, {})(App);

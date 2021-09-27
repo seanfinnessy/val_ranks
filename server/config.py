@@ -86,7 +86,7 @@ def get_store():
 def get_player_mmr(region, player_id, seasonID):
     response = requests.get(
         f"https://pd.{region}.a.pvp.net/mmr/v1/players/{player_id}", headers=headers, verify=False)
-    keys = ['Current Rank', 'Rank Rating', 'Leaderboard']
+    keys = ['CurrentRank', 'RankRating', 'Leaderboard']
     try:
         if response.ok:
             r = response.json()
@@ -149,6 +149,16 @@ def get_ongoing_match(region, match_id):
         print('Error retrieving game')
         raise SystemExit(e)
 
+def get_map_details(mapUuid):
+    response = requests.get(f"https://valorant-api.com/v1/maps/{mapUuid}")
+    try:
+        if response.ok:
+            r = response.json()
+            return r["data"]
+        else:
+            print("Could not find map details.")
+    except requests.exceptions.RequestException as e:
+        raise SystemExit(e)
 number_to_ranks = [
         'Unrated',
         'Unrated',
@@ -187,7 +197,7 @@ map_puuids = {
     "Range": "ee613ee9-28b7-4beb-9666-08db13bb2244",
     "Triad": "2bee0dc9-4ffe-519b-1cbd-7fbe763a6047"
 }
-
+#todo: NEED TO MAKE IT SO THAT MATCH DETAILS REFRESHES ON API CALL
 puuid = ''
 headers = {}
 lockfile = get_lockfile()
@@ -196,24 +206,3 @@ region = get_region()
 content = get_content(region)
 seasonID = get_latest_season_id(content)
 player_name = get_player_name(region, puuid)
-match_id = get_match_id(region, puuid)
-ongoing_match_details = get_ongoing_match(region, match_id)
-players_in_ongoing_match = ongoing_match_details["Players"]
-map_in_ongoing_match = str(ongoing_match_details["MapID"]).rsplit("/", 1)[1]
-
-map_puuidin_ongoing_match = map_puuids[map_in_ongoing_match]
-print(map_puuidin_ongoing_match)
-
-if ongoing_match_details["ProvisioningFlow"] == "CustomGame":
-    game_mode_in_ongoing_match = "Custom"
-else:
-    game_mode_in_ongoing_match = ongoing_match_details["MatchmakingData"]["QueueID"]
-
-
-puuuid_list = []
-for i in ongoing_match_details["Players"]:
-    puuuid_list.append(i["Subject"])
-
-mmr_list = []
-for puuid in puuuid_list:
-    mmr_list.append(get_player_mmr(region, puuid, seasonID))
