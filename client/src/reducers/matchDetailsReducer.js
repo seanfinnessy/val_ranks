@@ -1,16 +1,18 @@
 import { FETCH_MATCH_DETAILS, LOADING_MATCH_DETAILS } from '../actions/types';
 const initialState = {
-  loading: true,
+  loading: false,
   data: [],
   blueTeam: [],
-  redTeam: []
+  redTeam: [],
+  error: false,
+  inGame: false
 }
 export default function(state = initialState, action) {
   switch (action.type) {
     case LOADING_MATCH_DETAILS:
-      return {...state, loading: action.loading}
+      return {...state, loading: action.loading, inGame: action.inGame}
     case FETCH_MATCH_DETAILS:
-      return {...state, data: action.payload, blueTeam: action.blueTeam, redTeam: action.redTeam, loading: action.loading};
+      return {...state, data: action.payload, blueTeam: action.blueTeam, redTeam: action.redTeam, loading: action.loading, error: action.error, inGame: action.inGame};
     default:
       return state;
   }

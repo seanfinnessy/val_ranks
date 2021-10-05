@@ -202,7 +202,6 @@ map_puuids = {
     "Triad": "2bee0dc9-4ffe-519b-1cbd-7fbe763a6047"
 }
 
-#todo: NEED TO MAKE IT SO THAT MATCH DETAILS REFRESHES ON API CALL
 puuid = ''
 headers = {}
 lockfile = get_lockfile()
