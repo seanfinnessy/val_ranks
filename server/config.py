@@ -75,14 +75,6 @@ def get_latest_season_id(content):
         if season["IsActive"]:
             return season["ID"]
 
-
-def get_store():
-    response = requests.get(
-        f"https://pd.{region}.a.pvp.net/store/v2/storefront/{puuid}", headers=headers, verify=False)
-    store_info = response.json()
-    # returns skin levels uuid. use https://valorant-api.com/v1/weapons/skinlevels/uuid for more info
-    single_item_offers = store_info['SkinsPanelLayout']['SingleItemOffers']
-
 def get_player_mmr(region, player_id, seasonID):
     response = requests.get(
         f"https://pd.{region}.a.pvp.net/mmr/v1/players/{player_id}", headers=headers, verify=False)
@@ -159,6 +151,18 @@ def get_map_details(mapUuid):
             print("Could not find map details.")
     except requests.exceptions.RequestException as e:
         raise SystemExit(e)
+
+def get_agent_details(agentUuid):
+    try:
+        response = requests.get(f"https://valorant-api.com/v1/agents/{agentUuid}")
+        if response.ok:
+            r = response.json()
+            return r["data"]
+        else:
+            print("Could not get agent details")
+    except requests.exceptions.RequestException as e:
+        raise SystemExit(e)
+
 number_to_ranks = [
         'Unrated',
         'Unrated',
@@ -197,6 +201,7 @@ map_puuids = {
     "Range": "ee613ee9-28b7-4beb-9666-08db13bb2244",
     "Triad": "2bee0dc9-4ffe-519b-1cbd-7fbe763a6047"
 }
+
 #todo: NEED TO MAKE IT SO THAT MATCH DETAILS REFRESHES ON API CALL
 puuid = ''
 headers = {}

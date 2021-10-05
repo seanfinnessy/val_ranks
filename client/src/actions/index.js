@@ -139,9 +139,9 @@ export const fetchMatchDetails = () => async dispatch => {
   dispatch({type: LOADING_MATCH_DETAILS, loading: true});
   try {
     const res = await axios.get("/match_details");
-    dispatch({ type: FETCH_MATCH_DETAILS, payload: res.data, loading: false });
+    dispatch({ type: FETCH_MATCH_DETAILS, payload: res.data, loading: false, redTeam: res.data.red_team_details, blueTeam: res.data.blue_team_details });
   }
   catch {
-    dispatch({ type: FETCH_MATCH_DETAILS, payload: sample, loading: false });
+    dispatch({ type: FETCH_MATCH_DETAILS, payload: sample, loading: false, redTeam: [], blueTeam: []  });
   }
 }
