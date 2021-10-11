@@ -1,16 +1,13 @@
 import os
 import requests
 import base64
-import pprint
-import logging
 from requests.api import head
-from flask import Flask, jsonify
 
-import urllib3
+import urllib3  # type: ignore
 from werkzeug.wrappers import response
+
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
-app = Flask(__name__)
 
 def get_region():
     local_headers = {'Authorization': 'Basic ' +
@@ -48,7 +45,7 @@ def get_headers():
         if headers == {}:
             global puuid
             local_headers = {'Authorization': 'Basic ' +
-                            base64.b64encode(('riot:' + lockfile['password']).encode()).decode()}
+                             base64.b64encode(('riot:' + lockfile['password']).encode()).decode()}
             response = requests.get(
                 f"https://127.0.0.1:{lockfile['port']}/entitlements/v1/token", headers=local_headers, verify=False)
             entitlements = response.json()
@@ -64,6 +61,7 @@ def get_headers():
         print("You don't seem to be logged in...")
         exit(1)
 
+
 def get_content(region):
     response = requests.get(
         f"https://shared.{region}.a.pvp.net/content-service/v2/content", headers=headers, verify=False)
@@ -74,6 +72,7 @@ def get_latest_season_id(content):
     for season in content["Seasons"]:
         if season["IsActive"]:
             return season["ID"]
+
 
 def get_player_mmr(region, player_id, seasonID):
     response = requests.get(
@@ -104,8 +103,10 @@ def get_player_mmr(region, player_id, seasonID):
         rank = [0, 0, 0]
     return (dict(zip(keys, rank)))
 
+
 def get_player_name(region, player_id):
-    response = requests.put(f"https://pd.{region}.a.pvp.net/name-service/v2/players", headers=headers, json=[player_id], verify=False)
+    response = requests.put(
+        f"https://pd.{region}.a.pvp.net/name-service/v2/players", headers=headers, json=[player_id], verify=False)
     try:
         if response.ok:
             r = response.json()
@@ -115,8 +116,10 @@ def get_player_name(region, player_id):
         print('Could not find a user with this player id.')
         raise SystemExit(e)
 
+
 def get_match_id(region, puuid):
-    response = requests.get(f"https://glz-{region}-1.{region}.a.pvp.net/core-game/v1/players/{puuid}", headers=headers, verify=False)
+    response = requests.get(
+        f"https://glz-{region}-1.{region}.a.pvp.net/core-game/v1/players/{puuid}", headers=headers, verify=False)
     try:
         if response.ok:
             r = response.json()
@@ -129,8 +132,10 @@ def get_match_id(region, puuid):
         print('Error retrieving game')
         raise SystemExit(e)
 
+
 def get_ongoing_match(region, match_id):
-    response = requests.get(f"https://glz-{region}-1.{region}.a.pvp.net/core-game/v1/matches/{match_id}", headers=headers, verify=False)
+    response = requests.get(
+        f"https://glz-{region}-1.{region}.a.pvp.net/core-game/v1/matches/{match_id}", headers=headers, verify=False)
     try:
         if response.ok:
             r = response.json()
@@ -140,6 +145,7 @@ def get_ongoing_match(region, match_id):
     except requests.exceptions.RequestException as e:
         print('Error retrieving game')
         raise SystemExit(e)
+
 
 def get_map_details(mapUuid):
     response = requests.get(f"https://valorant-api.com/v1/maps/{mapUuid}")
@@ -152,9 +158,11 @@ def get_map_details(mapUuid):
     except requests.exceptions.RequestException as e:
         raise SystemExit(e)
 
+
 def get_agent_details(agentUuid):
     try:
-        response = requests.get(f"https://valorant-api.com/v1/agents/{agentUuid}")
+        response = requests.get(
+            f"https://valorant-api.com/v1/agents/{agentUuid}")
         if response.ok:
             r = response.json()
             return r["data"]
@@ -163,33 +171,34 @@ def get_agent_details(agentUuid):
     except requests.exceptions.RequestException as e:
         raise SystemExit(e)
 
+
 number_to_ranks = [
-        'Unrated',
-        'Unrated',
-        'Unrated',
-        'Iron 1',
-        'Iron 2',
-        'Iron 3',
-        'Bronze 1',
-        'Bronze 2',
-        'Bronze 3',
-        'Silver 1',
-        'Silver 2',
-        'Silver 3',
-        'Gold 1',
-        'Gold 2',
-        'Gold 3',
-        'Platinum 1',
-        'Platinum 2',
-        'Platinum 3',
-        'Diamond 1',
-        'Diamond 2',
-        'Diamond 3',
-        'Immortal 1',
-        'Immortal 2',
-        'Immortal 3',
-        'Radiant'
-    ]
+    'Unrated',
+    'Unrated',
+    'Unrated',
+    'Iron 1',
+    'Iron 2',
+    'Iron 3',
+    'Bronze 1',
+    'Bronze 2',
+    'Bronze 3',
+    'Silver 1',
+    'Silver 2',
+    'Silver 3',
+    'Gold 1',
+    'Gold 2',
+    'Gold 3',
+    'Platinum 1',
+    'Platinum 2',
+    'Platinum 3',
+    'Diamond 1',
+    'Diamond 2',
+    'Diamond 3',
+    'Immortal 1',
+    'Immortal 2',
+    'Immortal 3',
+    'Radiant'
+]
 
 map_puuids = {
     "Ascent": "7eaecc1b-4337-bbf6-6ab9-04b8f06b3319",

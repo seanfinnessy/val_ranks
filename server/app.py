@@ -7,9 +7,11 @@ from config import (
 
 app = Flask(__name__)
 
-@app.route('/', methods = ['GET'])
+
+@app.route('/', methods=['GET'])
 def get_hello():
-    return jsonify({"Hello":"World"})
+    return jsonify({"Hello": "World"})
+
 
 @app.route('/match_details', methods=['GET'])
 def get_match_details():
@@ -23,7 +25,8 @@ def get_match_details():
     players_in_ongoing_match = ongoing_match_details["Players"]
 
     # Get map of lobby
-    map_in_ongoing_match = str(ongoing_match_details["MapID"]).rsplit("/", 1)[1]
+    map_in_ongoing_match = str(
+        ongoing_match_details["MapID"]).rsplit("/", 1)[1]
 
     # Get map PUUID
     map_puuidin_ongoing_match = map_puuids[map_in_ongoing_match]
@@ -31,7 +34,6 @@ def get_match_details():
     # Get map details
     map_details = get_map_details(map_puuidin_ongoing_match)
 
-    
     # Check type of game in lobby
     if ongoing_match_details["ProvisioningFlow"] == "CustomGame":
         game_mode_in_ongoing_match = "Custom"
@@ -53,7 +55,7 @@ def get_match_details():
         "listViewIcon": map_details["listViewIcon"],
         "blue_team_details": [],
         "red_team_details": []
-        }
+    }
 
     list = []
     for playerId, agentId, teamId in zip(player_dict["puuid"], player_dict["agent"], player_dict["team"]):
@@ -69,9 +71,9 @@ def get_match_details():
         agent_details = get_agent_details(agentId)
         player_details["AgentName"] = agent_details["displayName"]
         player_details["AgentIcon"] = agent_details["displayIcon"]
-        player_details["Team"] = teamId 
+        player_details["Team"] = teamId
         list.append(player_details)
-    
+
     for player in list:
         if player["Team"] == "Blue":
             match_details["blue_team_details"].append(player)
@@ -79,8 +81,10 @@ def get_match_details():
             match_details["red_team_details"].append(player)
     return jsonify(match_details)
 
+
 def main():
     app.run(debug=True)
+
 
 if __name__ == "__main__":
     main()
