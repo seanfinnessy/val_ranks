@@ -9,6 +9,27 @@ from werkzeug.wrappers import response
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 
+class Setup:
+    @staticmethod
+    def get_lockfile():
+        try:
+            with open(os.path.join(os.getenv('LOCALAPPDATA'), R'Riot Games\Riot Client\Config\lockfile')) as lockfile:
+                data = lockfile.read().split(':')
+                keys = ['name', 'PID', 'port', 'password', 'protocol']
+                # dict constructor and zip function used to create dict with lockfile data.
+                return (dict(zip(keys, data)))
+        except FileNotFoundError:
+            print("Lockfile not found, you're not in a game!")
+            exit(1)
+
+    @staticmethod
+    def get_current_version():
+        response = requests.get("https://valorant-api.com/v1/version", verify=False)
+        res_json = response.json()
+        client_version = res_json['data']['riotClientVersion']
+        return client_version
+
+
 def get_region():
     local_headers = {'Authorization': 'Basic ' +
                      base64.b64encode(('riot:' + lockfile['password']).encode()).decode()}
@@ -16,27 +37,6 @@ def get_region():
         f"https://127.0.0.1:{lockfile['port']}/product-session/v1/external-sessions", headers=local_headers, verify=False)
     res_json = response.json()
     return list(res_json.values())[0]['launchConfiguration']['arguments'][3].split("=")[1]
-
-
-# The format is name:pid:port:password:protocol.
-def get_lockfile():
-    try:
-        with open(os.path.join(os.getenv('LOCALAPPDATA'), R'Riot Games\Riot Client\Config\lockfile')) as lockfile:
-            data = lockfile.read().split(':')
-            keys = ['name', 'PID', 'port', 'password', 'protocol']
-            # dict constructor and zip function used to create dict with lockfile data.
-            return (dict(zip(keys, data)))
-    except FileNotFoundError:
-        print("Lockfile not found, you're not in a game!")
-        exit(1)
-
-
-def get_current_version():
-    response = requests.get(
-        "https://valorant-api.com/v1/version", verify=False)
-    res_json = response.json()
-    client_version = res_json['data']['riotClientVersion']
-    return client_version
 
 
 def get_headers():
@@ -54,7 +54,7 @@ def get_headers():
                 'Authorization': f"Bearer {entitlements['accessToken']}",
                 'X-Riot-Entitlements-JWT': entitlements['token'],
                 'X-Riot-ClientPlatform': "ew0KCSJwbGF0Zm9ybVR5cGUiOiAiUEMiLA0KCSJwbGF0Zm9ybU9TIjogIldpbmRvd3MiLA0KCSJwbGF0Zm9ybU9TVmVyc2lvbiI6ICIxMC4wLjE5MDQyLjEuMjU2LjY0Yml0IiwNCgkicGxhdGZvcm1DaGlwc2V0IjogIlVua25vd24iDQp9",
-                'X-Riot-ClientVersion': get_current_version()
+                'X-Riot-ClientVersion': Setup.get_current_version()
             }
         return headers
     except ConnectionRefusedError:
@@ -213,7 +213,7 @@ map_puuids = {
 
 puuid = ''
 headers = {}
-lockfile = get_lockfile()
+lockfile = Setup.get_lockfile()
 headers = get_headers()
 region = get_region()
 content = get_content(region)
