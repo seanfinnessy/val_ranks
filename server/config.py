@@ -9,9 +9,10 @@ from werkzeug.wrappers import response
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 
-class Setup:
+class GameSetup:
     @staticmethod
-    def get_lockfile():
+    # Arguments needed: none
+    def get_lockfile() -> dict[str, str]:
         try:
             with open(os.path.join(os.getenv('LOCALAPPDATA'), R'Riot Games\Riot Client\Config\lockfile')) as lockfile:
                 data = lockfile.read().split(':')
@@ -23,57 +24,56 @@ class Setup:
             exit(1)
 
     @staticmethod
-    def get_current_version():
+    # Arguments needed: none
+    def get_current_version() -> str:
         response = requests.get("https://valorant-api.com/v1/version", verify=False)
         res_json = response.json()
         client_version = res_json['data']['riotClientVersion']
         return client_version
 
-
-def get_region():
-    local_headers = {'Authorization': 'Basic ' +
-                     base64.b64encode(('riot:' + lockfile['password']).encode()).decode()}
-    response = requests.get(
-        f"https://127.0.0.1:{lockfile['port']}/product-session/v1/external-sessions", headers=local_headers, verify=False)
-    res_json = response.json()
-    return list(res_json.values())[0]['launchConfiguration']['arguments'][3].split("=")[1]
-
-
-def get_headers():
-    global headers
-    try:
-        if headers == {}:
-            global puuid
+class LocalSetup:
+    def __init__(self, lockfile) -> None:
+        self.lockfile = lockfile
+    
+    # Arguments needed: lockfile
+    def get_region(self):
+        local_headers = {'Authorization': 'Basic ' +
+                        base64.b64encode(('riot:' + self.lockfile['password']).encode()).decode()}
+        response = requests.get(
+            f"https://127.0.0.1:{self.lockfile['port']}/product-session/v1/external-sessions", headers=local_headers, verify=False)
+        res_json = response.json()
+        return list(res_json.values())[0]['launchConfiguration']['arguments'][3].split("=")[1]
+    
+    # Arguments needed: lockfile
+    def get_headers(self) -> tuple[dict[str, str], str]:
+        try:
             local_headers = {'Authorization': 'Basic ' +
-                             base64.b64encode(('riot:' + lockfile['password']).encode()).decode()}
+                            base64.b64encode(('riot:' + self.lockfile['password']).encode()).decode()}
             response = requests.get(
-                f"https://127.0.0.1:{lockfile['port']}/entitlements/v1/token", headers=local_headers, verify=False)
+                f"https://127.0.0.1:{self.lockfile['port']}/entitlements/v1/token", headers=local_headers, verify=False)
             entitlements = response.json()
             puuid = entitlements['subject']
             headers = {
                 'Authorization': f"Bearer {entitlements['accessToken']}",
                 'X-Riot-Entitlements-JWT': entitlements['token'],
                 'X-Riot-ClientPlatform': "ew0KCSJwbGF0Zm9ybVR5cGUiOiAiUEMiLA0KCSJwbGF0Zm9ybU9TIjogIldpbmRvd3MiLA0KCSJwbGF0Zm9ybU9TVmVyc2lvbiI6ICIxMC4wLjE5MDQyLjEuMjU2LjY0Yml0IiwNCgkicGxhdGZvcm1DaGlwc2V0IjogIlVua25vd24iDQp9",
-                'X-Riot-ClientVersion': Setup.get_current_version()
+                'X-Riot-ClientVersion': GameSetup.get_current_version()
             }
-        return headers
-    except ConnectionRefusedError:
-        print("You don't seem to be logged in...")
-        exit(1)
+            return headers, puuid
+        except ConnectionRefusedError:
+            print("You don't seem to be logged in...")
+            exit(1)
 
-
-def get_content(region):
+# Arguments needed: headers
+def get_latest_season_id(region):
     response = requests.get(
         f"https://shared.{region}.a.pvp.net/content-service/v2/content", headers=headers, verify=False)
-    return response.json()
-
-
-def get_latest_season_id(content):
+    content = response.json()
     for season in content["Seasons"]:
         if season["IsActive"]:
             return season["ID"]
 
-
+# Arguments needed: headers
 def get_player_mmr(region, player_id, seasonID):
     response = requests.get(
         f"https://pd.{region}.a.pvp.net/mmr/v1/players/{player_id}", headers=headers, verify=False)
@@ -103,7 +103,7 @@ def get_player_mmr(region, player_id, seasonID):
         rank = [0, 0, 0]
     return (dict(zip(keys, rank)))
 
-
+# Arguments needed: headers
 def get_player_name(region, player_id):
     response = requests.put(
         f"https://pd.{region}.a.pvp.net/name-service/v2/players", headers=headers, json=[player_id], verify=False)
@@ -116,7 +116,7 @@ def get_player_name(region, player_id):
         print('Could not find a user with this player id.')
         raise SystemExit(e)
 
-
+# Arguments needed: headers
 def get_match_id(region, puuid):
     response = requests.get(
         f"https://glz-{region}-1.{region}.a.pvp.net/core-game/v1/players/{puuid}", headers=headers, verify=False)
@@ -132,7 +132,7 @@ def get_match_id(region, puuid):
         print('Error retrieving game')
         raise SystemExit(e)
 
-
+# Arguments needed: headers, region
 def get_ongoing_match(region, match_id):
     response = requests.get(
         f"https://glz-{region}-1.{region}.a.pvp.net/core-game/v1/matches/{match_id}", headers=headers, verify=False)
@@ -146,7 +146,7 @@ def get_ongoing_match(region, match_id):
         print('Error retrieving game')
         raise SystemExit(e)
 
-
+# Arguments needed: none
 def get_map_details(mapUuid):
     response = requests.get(f"https://valorant-api.com/v1/maps/{mapUuid}")
     try:
@@ -158,7 +158,7 @@ def get_map_details(mapUuid):
     except requests.exceptions.RequestException as e:
         raise SystemExit(e)
 
-
+# Arguments needed: none
 def get_agent_details(agentUuid):
     try:
         response = requests.get(
@@ -212,10 +212,8 @@ map_puuids = {
 }
 
 puuid = ''
-headers = {}
-lockfile = Setup.get_lockfile()
-headers = get_headers()
-region = get_region()
-content = get_content(region)
-seasonID = get_latest_season_id(content)
+lockfile = GameSetup.get_lockfile()
+headers, puuid = LocalSetup(lockfile=lockfile).get_headers()
+region = LocalSetup(lockfile=lockfile).get_region()
+seasonID = get_latest_season_id(region=region)
 player_name = get_player_name(region, puuid)
