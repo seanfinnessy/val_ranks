@@ -211,7 +211,6 @@ map_puuids = {
     "Triad": "2bee0dc9-4ffe-519b-1cbd-7fbe763a6047"
 }
 
-puuid = ''
 lockfile = GameSetup.get_lockfile()
 headers, puuid = LocalSetup(lockfile=lockfile).get_headers()
 region = LocalSetup(lockfile=lockfile).get_region()
