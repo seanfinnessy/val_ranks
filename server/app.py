@@ -1,9 +1,10 @@
 import json
 from flask import Flask, jsonify
 from requests.api import get
-from config import (
-    get_player_mmr, region, seasonID, get_player_name, number_to_ranks, get_ongoing_match, get_match_id, map_puuids, puuid, get_map_details, get_agent_details
+from setup import (
+    get_player_mmr, region, seasonID, get_player_name, puuid, get_agent_details, headers, LobbySetup
 )
+from conversions import map_puuids, number_to_ranks
 
 app = Flask(__name__)
 
@@ -15,38 +16,21 @@ def get_hello():
 
 @app.route('/match_details', methods=['GET'])
 def get_match_details():
+    # Setup lobby
+    lobby = LobbySetup(headers)
+
     # Get match ID
-    match_id = get_match_id(region, puuid)
+    match_id = lobby.get_match_id(region, puuid)
 
-    # Get match details using match ID
-    ongoing_match_details = get_ongoing_match(region, match_id)
-
-    # Get all players in lobby
-    players_in_ongoing_match = ongoing_match_details["Players"]
-
-    # Get map of lobby
-    map_in_ongoing_match = str(
-        ongoing_match_details["MapID"]).rsplit("/", 1)[1]
+    # Get match details to obtain all players, the map, and game mode.
+    player_dict, map_in_ongoing_match, game_mode_in_ongoing_match = lobby.get_ongoing_match(
+        region, match_id)
 
     # Get map PUUID
     map_puuidin_ongoing_match = map_puuids[map_in_ongoing_match]
 
     # Get map details
-    map_details = get_map_details(map_puuidin_ongoing_match)
-
-    # Check type of game in lobby
-    if ongoing_match_details["ProvisioningFlow"] == "CustomGame":
-        game_mode_in_ongoing_match = "Custom"
-    else:
-        game_mode_in_ongoing_match = ongoing_match_details["MatchmakingData"]["QueueID"]
-
-    # Get all PUUIDs in lobby
-    player_dict = {"puuid": [], "agent": [], "team": []}
-    for player in players_in_ongoing_match:
-        player_dict["puuid"].append(player["Subject"])
-        player_dict["agent"].append(player["CharacterID"])
-        player_dict["team"].append(player["TeamID"])
-    print(player_dict)
+    map_details = lobby.get_map_details(map_puuidin_ongoing_match)
 
     # New match details obj
     match_details = {

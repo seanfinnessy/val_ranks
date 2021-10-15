@@ -12,7 +12,7 @@ urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 class GameSetup:
     @staticmethod
     # Arguments needed: none
-    def get_lockfile() -> dict[str, str]:
+    def get_lockfile():
         try:
             with open(os.path.join(os.getenv('LOCALAPPDATA'), R'Riot Games\Riot Client\Config\lockfile')) as lockfile:
                 data = lockfile.read().split(':')
@@ -25,7 +25,7 @@ class GameSetup:
 
     @staticmethod
     # Arguments needed: none
-    def get_current_version() -> str:
+    def get_current_version():
         response = requests.get("https://valorant-api.com/v1/version", verify=False)
         res_json = response.json()
         client_version = res_json['data']['riotClientVersion']
@@ -45,7 +45,7 @@ class LocalSetup:
         return list(res_json.values())[0]['launchConfiguration']['arguments'][3].split("=")[1]
     
     # Arguments needed: lockfile
-    def get_headers(self) -> tuple[dict[str, str], str]:
+    def get_headers(self):
         try:
             local_headers = {'Authorization': 'Basic ' +
                             base64.b64encode(('riot:' + self.lockfile['password']).encode()).decode()}
@@ -63,6 +63,61 @@ class LocalSetup:
         except ConnectionRefusedError:
             print("You don't seem to be logged in...")
             exit(1)
+
+class LobbySetup:
+    def __init__(self, headers):
+        self.headers = headers
+
+    # Arguments needed: headers
+    def get_match_id(self, region, puuid):
+        try:
+            response = requests.get(f"https://glz-{region}-1.{region}.a.pvp.net/core-game/v1/players/{puuid}", headers=self.headers, verify=False)
+            if response.ok:
+                r = response.json()
+                match_id = r["MatchID"]
+                return match_id
+        except requests.exceptions.RequestException as e:
+            print('Error retrieving match_id.')
+            raise SystemExit(e)
+
+    # Arguments needed: headers, region
+    def get_ongoing_match(self, region, match_id):
+        try:
+            response = requests.get(
+            f"https://glz-{region}-1.{region}.a.pvp.net/core-game/v1/matches/{match_id}", headers=self.headers, verify=False)
+            if response.ok:
+                r = response.json()
+                players = r["Players"]
+                # Get all PUUIDs in lobby
+                player_dict = {"puuid": [], "agent": [], "team": []}
+                for player in players:
+                    player_dict["puuid"].append(player["Subject"])
+                    player_dict["agent"].append(player["CharacterID"])
+                    player_dict["team"].append(player["TeamID"])
+                map = str(r["MapID"]).rsplit("/", 1)[1]
+                if r["ProvisioningFlow"] == "CustomGame":
+                    game_mode_in_ongoing_match = "Custom"
+                else:
+                    game_mode_in_ongoing_match = r["MatchmakingData"]["QueueID"]
+                return player_dict, map, game_mode_in_ongoing_match
+            else:
+                print("Could not find active game.")
+        except requests.exceptions.RequestException as e:
+            print('Error retrieving ongoing match.')
+            raise SystemExit(e)
+
+    # Arguments needed: none
+    @staticmethod
+    def get_map_details(mapUuid):
+        response = requests.get(f"https://valorant-api.com/v1/maps/{mapUuid}")
+        try:
+            if response.ok:
+                r = response.json()
+                return r["data"]
+            else:
+                print("Could not find map details.")
+        except requests.exceptions.RequestException as e:
+            raise SystemExit(e)
 
 # Arguments needed: headers
 def get_latest_season_id(region):
@@ -116,48 +171,6 @@ def get_player_name(region, player_id):
         print('Could not find a user with this player id.')
         raise SystemExit(e)
 
-# Arguments needed: headers
-def get_match_id(region, puuid):
-    response = requests.get(
-        f"https://glz-{region}-1.{region}.a.pvp.net/core-game/v1/players/{puuid}", headers=headers, verify=False)
-    try:
-        if response.ok:
-            r = response.json()
-            subject = r["Subject"]
-            match_id = r["MatchID"]
-            return match_id
-        else:
-            print("Could not find active game.")
-    except requests.exceptions.RequestException as e:
-        print('Error retrieving game')
-        raise SystemExit(e)
-
-# Arguments needed: headers, region
-def get_ongoing_match(region, match_id):
-    response = requests.get(
-        f"https://glz-{region}-1.{region}.a.pvp.net/core-game/v1/matches/{match_id}", headers=headers, verify=False)
-    try:
-        if response.ok:
-            r = response.json()
-            return r
-        else:
-            print("Could not find active game.")
-    except requests.exceptions.RequestException as e:
-        print('Error retrieving game')
-        raise SystemExit(e)
-
-# Arguments needed: none
-def get_map_details(mapUuid):
-    response = requests.get(f"https://valorant-api.com/v1/maps/{mapUuid}")
-    try:
-        if response.ok:
-            r = response.json()
-            return r["data"]
-        else:
-            print("Could not find map details.")
-    except requests.exceptions.RequestException as e:
-        raise SystemExit(e)
-
 # Arguments needed: none
 def get_agent_details(agentUuid):
     try:
@@ -170,46 +183,6 @@ def get_agent_details(agentUuid):
             print("Could not get agent details")
     except requests.exceptions.RequestException as e:
         raise SystemExit(e)
-
-
-number_to_ranks = [
-    'Unrated',
-    'Unrated',
-    'Unrated',
-    'Iron 1',
-    'Iron 2',
-    'Iron 3',
-    'Bronze 1',
-    'Bronze 2',
-    'Bronze 3',
-    'Silver 1',
-    'Silver 2',
-    'Silver 3',
-    'Gold 1',
-    'Gold 2',
-    'Gold 3',
-    'Platinum 1',
-    'Platinum 2',
-    'Platinum 3',
-    'Diamond 1',
-    'Diamond 2',
-    'Diamond 3',
-    'Immortal 1',
-    'Immortal 2',
-    'Immortal 3',
-    'Radiant'
-]
-
-map_puuids = {
-    "Ascent": "7eaecc1b-4337-bbf6-6ab9-04b8f06b3319",
-    "Bonsai": "d960549e-485c-e861-8d71-aa9d1aed12a2",
-    "Canyon": "b529448b-4d60-346e-e89e-00a4c527a405",
-    "Duality": "2c9d57ec-4431-9c5e-2939-8f9ef6dd5cba",
-    "Foxtrot": "2fb9a4fd-47b8-4e7d-a969-74b4046ebd53",
-    "Port": "e2ad5c54-4114-a870-9641-8ea21279579a",
-    "Range": "ee613ee9-28b7-4beb-9666-08db13bb2244",
-    "Triad": "2bee0dc9-4ffe-519b-1cbd-7fbe763a6047"
-}
 
 lockfile = GameSetup.get_lockfile()
 headers, puuid = LocalSetup(lockfile=lockfile).get_headers()
