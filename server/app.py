@@ -23,8 +23,11 @@ def get_match_details():
     match_id = lobby.get_match_id(region, puuid)
 
     # Get match details to obtain all players, the map, and game mode.
-    player_dict, map_in_ongoing_match, game_mode_in_ongoing_match = lobby.get_ongoing_match(
-        region, match_id)
+    try:
+        player_dict, map_in_ongoing_match, game_mode_in_ongoing_match = lobby.get_ongoing_match(
+            region, match_id)
+    except:
+        print("Not in an active game.")
 
     # Get map PUUID
     map_puuidin_ongoing_match = map_puuids[map_in_ongoing_match]
@@ -41,28 +44,8 @@ def get_match_details():
         "red_team_details": []
     }
 
-    list = []
-    for playerId, agentId, teamId in zip(player_dict["puuid"], player_dict["agent"], player_dict["team"]):
-        # Get player details
-        player_details = get_player_name(region, playerId)
-        # Get player ranks
-        rank = get_player_mmr(region, playerId, seasonID)
-        # convert rank number to actual rank
-        rank["CurrentRank"] = number_to_ranks[rank["CurrentRank"]]
-        # Assign player their rank info
-        player_details["RankInfo"] = rank
-        # Assign player their agent details
-        agent_details = get_agent_details(agentId)
-        player_details["AgentName"] = agent_details["displayName"]
-        player_details["AgentIcon"] = agent_details["displayIcon"]
-        player_details["Team"] = teamId
-        list.append(player_details)
+    match_details = LobbySetup.create_player_details(player_dict=player_dict, region=region, seasonID=seasonID, match_details=match_details)
 
-    for player in list:
-        if player["Team"] == "Blue":
-            match_details["blue_team_details"].append(player)
-        else:
-            match_details["red_team_details"].append(player)
     return jsonify(match_details)
 
 

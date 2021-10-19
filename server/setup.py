@@ -1,6 +1,7 @@
 import os
 import requests
 import base64
+from conversions import number_to_ranks
 from requests.api import head
 
 import urllib3  # type: ignore
@@ -96,9 +97,9 @@ class LobbySetup:
                     player_dict["team"].append(player["TeamID"])
                 map = str(r["MapID"]).rsplit("/", 1)[1]
                 if r["ProvisioningFlow"] == "CustomGame":
-                    game_mode_in_ongoing_match = "Custom"
+                    game_mode_in_ongoing_match = "Custom".upper()
                 else:
-                    game_mode_in_ongoing_match = r["MatchmakingData"]["QueueID"]
+                    game_mode_in_ongoing_match = str(r["MatchmakingData"]["QueueID"]).upper()
                 return player_dict, map, game_mode_in_ongoing_match
             else:
                 print("Could not find active game.")
@@ -118,6 +119,32 @@ class LobbySetup:
                 print("Could not find map details.")
         except requests.exceptions.RequestException as e:
             raise SystemExit(e)
+    
+    @staticmethod
+    def create_player_details(player_dict, region, seasonID, match_details):
+        list = []
+        for playerId, agentId, teamId in zip(player_dict["puuid"], player_dict["agent"], player_dict["team"]):
+            # Get player details
+            player_details = get_player_name(region, playerId)
+            # Get player ranks
+            rank = get_player_mmr(region, playerId, seasonID)
+            # convert rank number to actual rank
+            rank["CurrentRank"] = number_to_ranks[rank["CurrentRank"]]
+            # Assign player their rank info
+            player_details["RankInfo"] = rank
+            # Assign player their agent details
+            agent_details = get_agent_details(agentId)
+            player_details["AgentName"] = agent_details["displayName"]
+            player_details["AgentIcon"] = agent_details["displayIcon"]
+            player_details["Team"] = teamId
+            list.append(player_details)
+
+        for player in list:
+            if player["Team"] == "Blue":
+                match_details["blue_team_details"].append(player)
+            else:
+                match_details["red_team_details"].append(player)
+        return match_details
 
 # Arguments needed: headers
 def get_latest_season_id(region):
