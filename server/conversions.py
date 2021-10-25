@@ -23,7 +23,7 @@ number_to_ranks = [
     'Immortal 1',
     'Immortal 2',
     'Immortal 3',
-    'Radiant'
+    'Radiant' 
 ]
 
 map_puuids = {

@@ -21,7 +21,7 @@ class GameSetup:
                 # dict constructor and zip function used to create dict with lockfile data.
                 return (dict(zip(keys, data)))
         except FileNotFoundError:
-            print("Lockfile not found, you're not in a game!")
+            print("Lockfile not found, you're not not logged into the game!")
             exit(1)
 
     @staticmethod
