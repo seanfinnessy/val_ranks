@@ -37,9 +37,9 @@ const Landing = ({ matchDetails, fetchMatchDetails }) => {
           <Button sx={{ marginBottom: "0.35em" }} variant="contained" onClick={fetchMatchDetails}>Refresh</Button>
         </Grid>
         <Grid item lg={12}>
-        <Container fixed>
+        <Container scrollable>
           <Box p={1} sx={{ bgcolor: '#ff4655', height: '100vh', borderRadius: "5px" }}>
-            <Paper sx={{ height: '100vh' }}>
+            <Paper sx={{ height: '100vh', overflow: 'auto' }}>
               <Box p={3}>
                 <Typography variant='h3' align='center'>{matchDetails.data.GameMode}</Typography>
                 {matchDetails.inGame ? renderMatchDetails() : renderDefaultScreen()}

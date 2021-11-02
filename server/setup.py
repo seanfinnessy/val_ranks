@@ -1,7 +1,7 @@
 import os
 import requests
 import base64
-from conversions import number_to_ranks
+from conversions import number_to_ranks, rank_icons
 from requests.api import head
 
 import urllib3  # type: ignore
@@ -27,29 +27,31 @@ class GameSetup:
     @staticmethod
     # Arguments needed: none
     def get_current_version():
-        response = requests.get("https://valorant-api.com/v1/version", verify=False)
+        response = requests.get(
+            "https://valorant-api.com/v1/version", verify=False)
         res_json = response.json()
         client_version = res_json['data']['riotClientVersion']
         return client_version
 
+
 class LocalSetup:
     def __init__(self, lockfile) -> None:
         self.lockfile = lockfile
-    
+
     # Arguments needed: lockfile
     def get_region(self):
         local_headers = {'Authorization': 'Basic ' +
-                        base64.b64encode(('riot:' + self.lockfile['password']).encode()).decode()}
+                         base64.b64encode(('riot:' + self.lockfile['password']).encode()).decode()}
         response = requests.get(
             f"https://127.0.0.1:{self.lockfile['port']}/product-session/v1/external-sessions", headers=local_headers, verify=False)
         res_json = response.json()
         return list(res_json.values())[0]['launchConfiguration']['arguments'][3].split("=")[1]
-    
+
     # Arguments needed: lockfile
     def get_headers(self):
         try:
             local_headers = {'Authorization': 'Basic ' +
-                            base64.b64encode(('riot:' + self.lockfile['password']).encode()).decode()}
+                             base64.b64encode(('riot:' + self.lockfile['password']).encode()).decode()}
             response = requests.get(
                 f"https://127.0.0.1:{self.lockfile['port']}/entitlements/v1/token", headers=local_headers, verify=False)
             entitlements = response.json()
@@ -65,6 +67,7 @@ class LocalSetup:
             print("You don't seem to be logged in...")
             exit(1)
 
+
 class LobbySetup:
     def __init__(self, headers):
         self.headers = headers
@@ -72,7 +75,8 @@ class LobbySetup:
     # Arguments needed: headers
     def get_match_id(self, region, puuid):
         try:
-            response = requests.get(f"https://glz-{region}-1.{region}.a.pvp.net/core-game/v1/players/{puuid}", headers=self.headers, verify=False)
+            response = requests.get(
+                f"https://glz-{region}-1.{region}.a.pvp.net/core-game/v1/players/{puuid}", headers=self.headers, verify=False)
             if response.ok:
                 r = response.json()
                 match_id = r["MatchID"]
@@ -85,7 +89,7 @@ class LobbySetup:
     def get_ongoing_match(self, region, match_id):
         try:
             response = requests.get(
-            f"https://glz-{region}-1.{region}.a.pvp.net/core-game/v1/matches/{match_id}", headers=self.headers, verify=False)
+                f"https://glz-{region}-1.{region}.a.pvp.net/core-game/v1/matches/{match_id}", headers=self.headers, verify=False)
             if response.ok:
                 r = response.json()
                 players = r["Players"]
@@ -99,7 +103,8 @@ class LobbySetup:
                 if r["ProvisioningFlow"] == "CustomGame":
                     game_mode_in_ongoing_match = "Custom".upper()
                 else:
-                    game_mode_in_ongoing_match = str(r["MatchmakingData"]["QueueID"]).upper()
+                    game_mode_in_ongoing_match = str(
+                        r["MatchmakingData"]["QueueID"]).upper()
                 return player_dict, map, game_mode_in_ongoing_match
             else:
                 print("Could not find active game.")
@@ -119,7 +124,7 @@ class LobbySetup:
                 print("Could not find map details.")
         except requests.exceptions.RequestException as e:
             raise SystemExit(e)
-    
+
     @staticmethod
     def create_player_details(player_dict, region, seasonID, match_details):
         list = []
@@ -130,6 +135,8 @@ class LobbySetup:
             rank = get_player_mmr(region, playerId, seasonID)
             # convert rank number to actual rank
             rank["CurrentRank"] = number_to_ranks[rank["CurrentRank"]]
+            # get rank icons
+            rank["RankIcon"] = rank_icons[rank["CurrentRank"]]
             # Assign player their rank info
             player_details["RankInfo"] = rank
             # Assign player their agent details
@@ -147,15 +154,22 @@ class LobbySetup:
         return match_details
 
 # Arguments needed: headers
+
+
 def get_latest_season_id(region):
-    response = requests.get(
-        f"https://shared.{region}.a.pvp.net/content-service/v2/content", headers=headers, verify=False)
-    content = response.json()
-    for season in content["Seasons"]:
-        if season["IsActive"]:
-            return season["ID"]
+    try:
+        response = requests.get(
+            f"https://shared.{region}.a.pvp.net/content-service/v2/content", headers=headers, verify=False)
+        content = response.json()
+        for season in content["Seasons"]:
+            if season["IsActive"]:
+                return season["ID"]
+    except:
+        NameError("Must be in an active game.")
 
 # Arguments needed: headers
+
+
 def get_player_mmr(region, player_id, seasonID):
     response = requests.get(
         f"https://pd.{region}.a.pvp.net/mmr/v1/players/{player_id}", headers=headers, verify=False)
@@ -186,6 +200,8 @@ def get_player_mmr(region, player_id, seasonID):
     return (dict(zip(keys, rank)))
 
 # Arguments needed: headers
+
+
 def get_player_name(region, player_id):
     response = requests.put(
         f"https://pd.{region}.a.pvp.net/name-service/v2/players", headers=headers, json=[player_id], verify=False)
@@ -199,6 +215,8 @@ def get_player_name(region, player_id):
         raise SystemExit(e)
 
 # Arguments needed: none
+
+
 def get_agent_details(agentUuid):
     try:
         response = requests.get(
@@ -210,6 +228,7 @@ def get_agent_details(agentUuid):
             print("Could not get agent details")
     except requests.exceptions.RequestException as e:
         raise SystemExit(e)
+
 
 lockfile = GameSetup.get_lockfile()
 headers, puuid = LocalSetup(lockfile=lockfile).get_headers()

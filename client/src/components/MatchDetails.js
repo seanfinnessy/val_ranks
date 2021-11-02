@@ -18,7 +18,7 @@ const MatchDetails = ({ matchDetails }) => {
           {
             matchDetails.loading 
             ? null
-            : 
+            : typeof matchDetails.redTeam !== 'undefined' ?
             <Paper>
               <List>
                 {
@@ -29,20 +29,23 @@ const MatchDetails = ({ matchDetails }) => {
                           <Avatar alt={player.AgentName} src={player.AgentIcon} />
                         </ListItemAvatar>
                         <ListItemText inset='true' primary={`${player.GameName} #${player.TagLine}`} />
-                        <ListItemText inset='true' primary={`${player.RankInfo.CurrentRank} - ${player.RankInfo.RankRating} RR`} />
+                        <ListItemAvatar>
+                            <Avatar alt={player.RankInfo.CurrentRank} src={player.RankInfo.RankIcon} />
+                          </ListItemAvatar>
+                        <ListItemText inset='true' primary={`${player.RankInfo.RankRating} RR`} />
                       </ListItem>
                     )
                   })
                 }
               </List>
-            </Paper>
+            </Paper> : <Typography variant='h6' align='center'>Not in a game.</Typography>
           }
         </Grid>
         <Grid item xs={12} md={6} align="center">
           {
             matchDetails.loading 
             ? null
-            : 
+            : typeof matchDetails.redTeam !== 'undefined' ?
             <Paper>
             <List>
                   {
@@ -53,13 +56,16 @@ const MatchDetails = ({ matchDetails }) => {
                             <Avatar alt={player.AgentName} src={player.AgentIcon} />
                           </ListItemAvatar>
                           <ListItemText inset='true' primary={`${player.GameName} #${player.TagLine}`} />
-                          <ListItemText inset='true' primary={`${player.RankInfo.CurrentRank} - ${player.RankInfo.RankRating} RR`} />
+                          <ListItemAvatar>
+                            <Avatar alt={player.RankInfo.CurrentRank} src={player.RankInfo.RankIcon} />
+                          </ListItemAvatar>
+                          <ListItemText inset='true' primary={`${player.RankInfo.RankRating} RR`} />
                         </ListItem>
                       )
                     })
                   }
                 </List>
-            </Paper>
+            </Paper> : <Typography variant='h6' align='center'>Not in a game.</Typography>
           }
         </Grid>
       </Grid>

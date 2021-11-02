@@ -1,6 +1,7 @@
 import React from 'react'
 import { Typography, List, ListItem, ListItemText, Grid, Paper, ListItemIcon, ListItemAvatar, Avatar, CircularProgress } from '@mui/material'
 import { connect } from 'react-redux';
+import { flexbox } from '@mui/system';
 
 const OneTeamMatchDetails = ({ matchDetails }) => {
 
@@ -28,27 +29,35 @@ const OneTeamMatchDetails = ({ matchDetails }) => {
             ? null
             : 
             <Paper>
-            <List>
+            <List sx={{display: flexbox, textAlign: 'center', justifyContent: 'center'}}>
                   {
                     matchDetails.blueTeam.length === 0 ?
                     matchDetails.redTeam.map((player, index) => {
                       return (
-                        <ListItem color="primary" divider key={index}>
+                        <ListItem alignItems="flex-start" color="primary" divider key={index}>
                           <ListItemAvatar>
                             <Avatar alt={player.AgentName} src={player.AgentIcon} />
                           </ListItemAvatar>
-                          <ListItemText inset='true' primary={`${player.GameName} #${player.TagLine}`} />
-                          <ListItemText inset='true' primary={`${player.RankInfo.CurrentRank} - ${player.RankInfo.RankRating} RR`} />
+                          <ListItemText primary={`${player.GameName} #${player.TagLine}`} />
+                          <ListItemText primary={"W L L"} />
+                          <ListItemAvatar>
+                            <Avatar alt={player.RankInfo.CurrentRank} src={player.RankInfo.RankIcon} />
+                            <ListItemText primary={`${player.RankInfo.RankRating} RR`} />
+                          </ListItemAvatar>
                         </ListItem>
                       )
                     }) : matchDetails.blueTeam.map((player, index) => {
                       return (
-                        <ListItem color="primary" divider key={index}>
+                        <ListItem alignItems="flex-start" color="primary" divider key={index}>
                           <ListItemAvatar>
                             <Avatar alt={player.AgentName} src={player.AgentIcon} />
                           </ListItemAvatar>
-                          <ListItemText inset='true' primary={`${player.GameName} #${player.TagLine}`} />
-                          <ListItemText inset='true' primary={`${player.RankInfo.CurrentRank} - ${player.RankInfo.RankRating} RR`} />
+                          <ListItemText  primary={`${player.GameName} #${player.TagLine}`} />
+                          <ListItemText primary={"W L L"} />
+                          <ListItemAvatar>
+                            <Avatar alt={player.RankInfo.CurrentRank} src={player.RankInfo.RankIcon} />
+                            <ListItemText primary={`${player.RankInfo.RankRating} RR`} />
+                          </ListItemAvatar>
                         </ListItem>
                       )
                     })

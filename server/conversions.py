@@ -23,8 +23,36 @@ number_to_ranks = [
     'Immortal 1',
     'Immortal 2',
     'Immortal 3',
-    'Radiant' 
+    'Radiant'
 ]
+
+rank_icons = {
+    'Unrated': "https://media.valorant-api.com/competitivetiers/564d8e28-c226-3180-6285-e48a390db8b1/0/smallicon.png",
+    'Unrated': "https://media.valorant-api.com/competitivetiers/564d8e28-c226-3180-6285-e48a390db8b1/0/smallicon.png",
+    'Unrated': "https://media.valorant-api.com/competitivetiers/564d8e28-c226-3180-6285-e48a390db8b1/0/smallicon.png",
+    'Iron 1': "https://media.valorant-api.com/competitivetiers/edb72a72-7e6d-6010-9591-7c053bbdbf48/3/smallicon.png",
+    'Iron 2': "https://media.valorant-api.com/competitivetiers/edb72a72-7e6d-6010-9591-7c053bbdbf48/4/smallicon.png",
+    'Iron 3': "https://media.valorant-api.com/competitivetiers/edb72a72-7e6d-6010-9591-7c053bbdbf48/5/smallicon.png",
+    'Bronze 1': "https://media.valorant-api.com/competitivetiers/edb72a72-7e6d-6010-9591-7c053bbdbf48/6/smallicon.png",
+    'Bronze 2': "https://media.valorant-api.com/competitivetiers/edb72a72-7e6d-6010-9591-7c053bbdbf48/7/smallicon.png",
+    'Bronze 3': "https://media.valorant-api.com/competitivetiers/edb72a72-7e6d-6010-9591-7c053bbdbf48/8/smallicon.png",
+    'Silver 1': "https://media.valorant-api.com/competitivetiers/edb72a72-7e6d-6010-9591-7c053bbdbf48/9/smallicon.png",
+    'Silver 2': "https://media.valorant-api.com/competitivetiers/edb72a72-7e6d-6010-9591-7c053bbdbf48/10/smallicon.png",
+    'Silver 3': "https://media.valorant-api.com/competitivetiers/edb72a72-7e6d-6010-9591-7c053bbdbf48/11/smallicon.png",
+    'Gold 1': "https://media.valorant-api.com/competitivetiers/edb72a72-7e6d-6010-9591-7c053bbdbf48/12/smallicon.png",
+    'Gold 2': "https://media.valorant-api.com/competitivetiers/edb72a72-7e6d-6010-9591-7c053bbdbf48/13/smallicon.png",
+    'Gold 3': "https://media.valorant-api.com/competitivetiers/edb72a72-7e6d-6010-9591-7c053bbdbf48/14/smallicon.png",
+    'Platinum 1': "https://media.valorant-api.com/competitivetiers/edb72a72-7e6d-6010-9591-7c053bbdbf48/15/smallicon.png",
+    'Platinum 2': "https://media.valorant-api.com/competitivetiers/edb72a72-7e6d-6010-9591-7c053bbdbf48/16/smallicon.png",
+    'Platinum 3': "https://media.valorant-api.com/competitivetiers/edb72a72-7e6d-6010-9591-7c053bbdbf48/17/smallicon.png",
+    'Diamond 1': "https://media.valorant-api.com/competitivetiers/edb72a72-7e6d-6010-9591-7c053bbdbf48/18/smallicon.png",
+    'Diamond 2': "https://media.valorant-api.com/competitivetiers/edb72a72-7e6d-6010-9591-7c053bbdbf48/19/smallicon.png",
+    'Diamond 3': "https://media.valorant-api.com/competitivetiers/edb72a72-7e6d-6010-9591-7c053bbdbf48/20/smallicon.png",
+    'Immortal 1': "https://media.valorant-api.com/competitivetiers/edb72a72-7e6d-6010-9591-7c053bbdbf48/21/smallicon.png",
+    'Immortal 2': "https://media.valorant-api.com/competitivetiers/edb72a72-7e6d-6010-9591-7c053bbdbf48/22/smallicon.png",
+    'Immortal 3': "https://media.valorant-api.com/competitivetiers/edb72a72-7e6d-6010-9591-7c053bbdbf48/23/smallicon.png",
+    'Radiant': "https://media.valorant-api.com/competitivetiers/edb72a72-7e6d-6010-9591-7c053bbdbf48/24/smallicon.png"
+}
 
 map_puuids = {
     "Ascent": "7eaecc1b-4337-bbf6-6ab9-04b8f06b3319",
