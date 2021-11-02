@@ -126,13 +126,14 @@ class LobbySetup:
             raise SystemExit(e)
 
     @staticmethod
-    def create_player_details(player_dict, region, seasonID, match_details):
+    def create_player_details(player_dict, region, seasonID, match_details, match_uuid):
         list = []
         for playerId, agentId, teamId in zip(player_dict["puuid"], player_dict["agent"], player_dict["team"]):
             # Get player details
             player_details = get_player_name(region, playerId)
             # Get player ranks
-            rank = get_player_mmr(region, playerId, seasonID)
+            rank, winRatio = get_player_mmr(region, playerId, seasonID)
+            rank["WinLossRatio"] = winRatio
             # convert rank number to actual rank
             rank["CurrentRank"] = number_to_ranks[rank["CurrentRank"]]
             # get rank icons
@@ -141,9 +142,13 @@ class LobbySetup:
             player_details["RankInfo"] = rank
             # Assign player their agent details
             agent_details = get_agent_details(agentId)
+            # Get loadout of player
+            vandalType, phantomType = get_loadouts(match_id=match_uuid, region=region, agentUuid=agentId)
             player_details["AgentName"] = agent_details["displayName"]
             player_details["AgentIcon"] = agent_details["displayIcon"]
             player_details["Team"] = teamId
+            player_details["VandalType"] = vandalType
+            player_details["PhantomType"] = phantomType
             list.append(player_details)
 
         for player in list:
@@ -152,9 +157,6 @@ class LobbySetup:
             else:
                 match_details["red_team_details"].append(player)
         return match_details
-
-# Arguments needed: headers
-
 
 def get_latest_season_id(region):
     try:
@@ -167,9 +169,6 @@ def get_latest_season_id(region):
     except:
         NameError("Must be in an active game.")
 
-# Arguments needed: headers
-
-
 def get_player_mmr(region, player_id, seasonID):
     response = requests.get(
         f"https://pd.{region}.a.pvp.net/mmr/v1/players/{player_id}", headers=headers, verify=False)
@@ -177,6 +176,12 @@ def get_player_mmr(region, player_id, seasonID):
     try:
         if response.ok:
             r = response.json()
+            if r["QueueSkills"]["competitive"]["SeasonalInfoBySeasonID"][seasonID] or r["QueueSkills"]["competitive"]["SeasonalInfoBySeasonID"][seasonID]["NumberOfWinsWithPlacements"] != 0:
+                numberOfWins = r["QueueSkills"]["competitive"]["SeasonalInfoBySeasonID"][seasonID]["NumberOfWinsWithPlacements"]
+                numberOfGames = r["QueueSkills"]["competitive"]["SeasonalInfoBySeasonID"][seasonID]["NumberOfGames"]
+                winPercent = (int(numberOfWins) / int(numberOfGames)) * 100
+            else:  
+                winPercent = 0
             rankTIER = r["QueueSkills"]["competitive"]["SeasonalInfoBySeasonID"][seasonID]["CompetitiveTier"]
             if int(rankTIER) >= 21:
                 rank = [rankTIER,
@@ -193,14 +198,14 @@ def get_player_mmr(region, player_id, seasonID):
         else:
             print("failed getting rank")
             rank = [0, 0, 0]
+            winPercent = 0
     except TypeError:
         rank = [0, 0, 0]
+        winPercent = 0
     except KeyError:
         rank = [0, 0, 0]
-    return (dict(zip(keys, rank)))
-
-# Arguments needed: headers
-
+        winPercent = 0
+    return dict(zip(keys, rank)), winPercent
 
 def get_player_name(region, player_id):
     response = requests.put(
@@ -226,6 +231,37 @@ def get_agent_details(agentUuid):
             return r["data"]
         else:
             print("Could not get agent details")
+    except requests.exceptions.RequestException as e:
+        raise SystemExit(e)
+
+def get_loadouts(match_id, region, agentUuid):
+    try:
+        response = requests.get(f"https://glz-{region}-1.{region}.a.pvp.net/core-game/v1/matches/{match_id}/loadouts", headers=headers, verify=False)
+        if response.ok:
+            r = response.json()
+            agentLoadout = next(filter(lambda x: x["CharacterID"] == agentUuid, r["Loadouts"]), None)
+            # Vandal: "9c82e19d-4575-0200-1a81-3eacf00cf872"
+            # Phantom: "ee8e8d15-496b-07ac-e5f6-8fae5d4c7b1a"
+            # Skin type socket: "bcef87d6-209b-46c6-8b19-fbe40bd95abc"
+            # ID returns the skin uuid
+            vandalSkinUuid = agentLoadout["Loadout"]["Items"]["9c82e19d-4575-0200-1a81-3eacf00cf872"]["Sockets"]["bcef87d6-209b-46c6-8b19-fbe40bd95abc"]["Item"]["ID"]
+            phantomSkinUuid = agentLoadout["Loadout"]["Items"]["ee8e8d15-496b-07ac-e5f6-8fae5d4c7b1a"]["Sockets"]["bcef87d6-209b-46c6-8b19-fbe40bd95abc"]["Item"]["ID"]
+        else:
+            print("Could not get loadout details.")
+    except requests.exceptions.RequestException as e:
+        raise SystemExit(e)
+    try:
+        vandalResponse = requests.get(f"https://valorant-api.com/v1/weapons/skins/{vandalSkinUuid}")
+        phantomResponse = requests.get(f"https://valorant-api.com/v1/weapons/skins/{phantomSkinUuid}")
+        if vandalResponse.ok and phantomResponse.ok:
+            rV = vandalResponse.json()
+            rP = phantomResponse.json()
+            vandalRenderUrl = rV["data"]["chromas"][0]["fullRender"]
+            phantomRenderUrl = rP["data"]["chromas"][0]["fullRender"]
+            return vandalRenderUrl, phantomRenderUrl
+        else:
+            # If cannot retrieve skin, send default skins instead.
+            return "https://media.valorant-api.com/weaponskinchromas/19629ae1-4996-ae98-7742-24a240d41f99/fullrender.png", "https://media.valorant-api.com/weaponskinchromas/52221ba2-4e4c-ec76-8c81-3483506d5242/fullrender.png"
     except requests.exceptions.RequestException as e:
         raise SystemExit(e)
 

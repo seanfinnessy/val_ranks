@@ -29,16 +29,26 @@ const MatchDetails = ({ matchDetails }) => {
                           <Avatar alt={player.AgentName} src={player.AgentIcon} />
                         </ListItemAvatar>
                         <ListItemText inset='true' primary={`${player.GameName} #${player.TagLine}`} />
+                        <ListItemText 
+                          inset='true' 
+                          primary={
+                          <div>
+                            <img src={player.VandalType} style={{width: '200px', height: '50px'}} />
+                            <br/>
+                            <img src={player.PhantomType} style={{width: '200px', height: '50px'}} />
+                            </div> 
+                          } />
                         <ListItemAvatar>
                             <Avatar alt={player.RankInfo.CurrentRank} src={player.RankInfo.RankIcon} />
-                          </ListItemAvatar>
-                        <ListItemText inset='true' primary={`${player.RankInfo.RankRating} RR`} />
+                            <Typography variant='body2'>{`${player.RankInfo.RankRating} RR`}</Typography>
+                            <Typography variant='body2'>{`${player.RankInfo.WinLossRatio}% Win Rate`}</Typography>
+                        </ListItemAvatar>
                       </ListItem>
                     )
                   })
                 }
               </List>
-            </Paper> : <Typography variant='h6' align='center'>Not in a game.</Typography>
+            </Paper> : null
           }
         </Grid>
         <Grid item xs={12} md={6} align="center">
@@ -56,16 +66,26 @@ const MatchDetails = ({ matchDetails }) => {
                             <Avatar alt={player.AgentName} src={player.AgentIcon} />
                           </ListItemAvatar>
                           <ListItemText inset='true' primary={`${player.GameName} #${player.TagLine}`} />
+                          <ListItemText 
+                          inset='true' 
+                          primary={
+                          <div>
+                            <img src={player.VandalType} style={{width: '200px', height: '50px'}} />
+                            <br/>
+                            <img src={player.PhantomType} style={{width: '200px', height: '50px'}} />
+                            </div> 
+                          } />
                           <ListItemAvatar>
                             <Avatar alt={player.RankInfo.CurrentRank} src={player.RankInfo.RankIcon} />
-                          </ListItemAvatar>
-                          <ListItemText inset='true' primary={`${player.RankInfo.RankRating} RR`} />
+                            <Typography variant='body2'>{`${player.RankInfo.RankRating} RR`}</Typography>
+                            <Typography variant='body2'>{`${player.RankInfo.WinLossRatio}% Win Rate`}</Typography>
+                        </ListItemAvatar>
                         </ListItem>
                       )
                     })
                   }
                 </List>
-            </Paper> : <Typography variant='h6' align='center'>Not in a game.</Typography>
+            </Paper> : null
           }
         </Grid>
       </Grid>

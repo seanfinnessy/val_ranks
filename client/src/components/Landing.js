@@ -1,14 +1,15 @@
 import React, {useEffect} from 'react'
-import { fetchMatchDetails } from '../actions';
+import { fetchMatchDetails, fetchCurrentUser } from '../actions';
 import { connect } from 'react-redux';
 import MatchDetails from './MatchDetails';
 import OneTeamMatchDetails from './OneTeamMatchDetails';
-import { Typography, Grid, Container, Box, Paper, Button } from '@mui/material';
+import { Typography, Grid, Container, Box, Paper, Button, CircularProgress } from '@mui/material';
 
-const Landing = ({ matchDetails, fetchMatchDetails }) => {
+const Landing = ({ matchDetails, fetchMatchDetails, currentUser, fetchCurrentUser }) => {
   useEffect(() => {
     fetchMatchDetails();
-    console.log(matchDetails);
+    fetchCurrentUser();
+    console.log(currentUser.currentUser);
   }, [])
 
   const renderMatchDetails = () => {
@@ -30,23 +31,30 @@ const Landing = ({ matchDetails, fetchMatchDetails }) => {
   }
   return (
     <>
-      <Grid container>
+      <Grid>
         <Grid item lg={12} align="center">
-          <Typography variant='h1' align='center' color="textPrimary">RANK NABBER</Typography>
+          <Typography variant='h1' align='center' color="textPrimary">VALORANT SPY</Typography>
           <Typography gutterBottom variant='h6' align='center' color="textPrimary">Nab the ranks of everyone in your lobby and see through streamer mode</Typography>
-          <Button sx={{ marginBottom: "0.35em" }} variant="contained" onClick={fetchMatchDetails}>Refresh</Button>
+          <Button sx={{ marginBottom: "0.35em" }} variant="contained" onClick={() => {fetchMatchDetails(); fetchCurrentUser()}}>Refresh</Button>
         </Grid>
         <Grid item lg={12}>
-        <Container scrollable>
-          <Box p={1} sx={{ bgcolor: '#ff4655', height: '100vh', borderRadius: "5px" }}>
-            <Paper sx={{ height: '100vh', overflow: 'auto' }}>
-              <Box p={3}>
-                <Typography variant='h3' align='center'>{matchDetails.data.GameMode}</Typography>
-                {matchDetails.inGame ? renderMatchDetails() : renderDefaultScreen()}
-              </Box>
-            </Paper>
-          </Box>
-        </Container>
+          <Typography sx={{paddingLeft: '24px'}} variant='body2' align='left' color="textPrimary">
+            Logged in as: <b>
+            {
+            currentUser.currentUserName + ' #' + currentUser.currentUserTag
+            }
+            </b>
+          </Typography>
+          <Container scrollable maxWidth="xl">
+            <Box p={1} sx={{ bgcolor: '#ff4655', height: '100vh', borderRadius: "5px" }}>
+              <Paper sx={{ height: '100vh', overflow: 'auto' }}>
+                <Box p={3}>
+                  <Typography variant='h3' align='center'>{matchDetails.data.GameMode}</Typography>
+                  {matchDetails.inGame ? renderMatchDetails() : renderDefaultScreen()}
+                </Box>
+              </Paper>
+            </Box>
+          </Container>
         </Grid>
       </Grid>
     </>
@@ -55,8 +63,9 @@ const Landing = ({ matchDetails, fetchMatchDetails }) => {
 
 const mapStateToProps = (state) => {
   return {
-    matchDetails: state.matchDetails
+    matchDetails: state.matchDetails,
+    currentUser: state.currentUser
   }
 }
 
-export default connect(mapStateToProps, {fetchMatchDetails})(Landing);
+export default connect(mapStateToProps, {fetchMatchDetails, fetchCurrentUser})(Landing);

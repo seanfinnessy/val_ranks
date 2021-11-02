@@ -34,30 +34,48 @@ const OneTeamMatchDetails = ({ matchDetails }) => {
                     matchDetails.blueTeam.length === 0 ?
                     matchDetails.redTeam.map((player, index) => {
                       return (
-                        <ListItem alignItems="flex-start" color="primary" divider key={index}>
-                          <ListItemAvatar>
-                            <Avatar alt={player.AgentName} src={player.AgentIcon} />
-                          </ListItemAvatar>
-                          <ListItemText primary={`${player.GameName} #${player.TagLine}`} />
-                          <ListItemText primary={"W L L"} />
-                          <ListItemAvatar>
+                        <ListItem color="secondary" divider key={index}>
+                        <ListItemAvatar>
+                          <Avatar alt={player.AgentName} src={player.AgentIcon} />
+                        </ListItemAvatar>
+                        <ListItemText inset='true' primary={`${player.GameName} #${player.TagLine}`} />
+                        <ListItemText 
+                          inset='true' 
+                          primary={
+                          <div>
+                            <img src={player.VandalType} style={{width: '200px', height: '50px'}} />
+                            <br/>
+                            <img src={player.PhantomType} style={{width: '200px', height: '50px'}} />
+                            </div> 
+                          } />
+                        <ListItemAvatar>
                             <Avatar alt={player.RankInfo.CurrentRank} src={player.RankInfo.RankIcon} />
-                            <ListItemText primary={`${player.RankInfo.RankRating} RR`} />
-                          </ListItemAvatar>
-                        </ListItem>
+                            <Typography variant='body2'>{`${player.RankInfo.RankRating} RR`}</Typography>
+                            <Typography variant='body2'>{`${player.RankInfo.WinLossRatio}% Win Rate`}</Typography>
+                        </ListItemAvatar>
+                      </ListItem>
                       )
                     }) : matchDetails.blueTeam.map((player, index) => {
                       return (
                         <ListItem alignItems="flex-start" color="primary" divider key={index}>
                           <ListItemAvatar>
                             <Avatar alt={player.AgentName} src={player.AgentIcon} />
-                          </ListItemAvatar>
+                          </ListItemAvatar>                
                           <ListItemText  primary={`${player.GameName} #${player.TagLine}`} />
-                          <ListItemText primary={"W L L"} />
+                          <ListItemText 
+                          inset='true' 
+                          primary={
+                          <div>
+                            <img src={player.VandalType} style={{width: '200px', height: '50px'}} />
+                            <br/>
+                            <img src={player.PhantomType} style={{width: '200px', height: '50px'}} />
+                            </div> 
+                          } />
                           <ListItemAvatar>
                             <Avatar alt={player.RankInfo.CurrentRank} src={player.RankInfo.RankIcon} />
-                            <ListItemText primary={`${player.RankInfo.RankRating} RR`} />
-                          </ListItemAvatar>
+                            <Typography variant='body2'>{`${player.RankInfo.RankRating} RR`}</Typography>
+                            <Typography variant='body2'>{`${player.RankInfo.WinLossRatio}% Win Rate`}</Typography>
+                        </ListItemAvatar>
                         </ListItem>
                       )
                     })
