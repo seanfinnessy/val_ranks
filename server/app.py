@@ -11,7 +11,7 @@ puuid: str = ""
 region: str = ""
 seasonID: str = ""
 
-
+#TODO: When loggin in and out, cannot retrieve loadouts.
 def setup_lobby():
     try:
         # Setup lobby
@@ -65,14 +65,19 @@ def get_logged_in_user():
     global region
     new_lockfile = GameSetup.get_lockfile()
     if lockfile["PID"] == new_lockfile["PID"]:
+        lockfile = new_lockfile
         player = get_player_name(region, puuid)
+        pres = LocalSetup(lockfile).get_presence(puuid)
+        print(pres)
         return jsonify({'current_user_name': player["GameName"], 'current_user_tag': player["TagLine"]})
     else:
         try:
             lockfile = GameSetup.get_lockfile()
-            headers, puuid = LocalSetup(lockfile=lockfile).get_headers()
-            region = LocalSetup(lockfile=lockfile).get_region()
+            headers, puuid = LocalSetup(lockfile).get_headers()
+            region = LocalSetup(lockfile).get_region()
             player = get_player_name(region, puuid)
+            pres = LocalSetup(lockfile).get_presence(puuid)
+            print(pres)
             return jsonify({'current_user_name': player["GameName"], 'current_user_tag': player["TagLine"]})
         except:
             return jsonify({'current_user_name': 'N/A', 'current_user_tag': 'N/A'})

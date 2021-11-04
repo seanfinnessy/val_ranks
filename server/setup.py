@@ -1,3 +1,4 @@
+import json
 import os
 import requests
 import base64
@@ -35,25 +36,31 @@ class GameSetup:
 
 
 class LocalSetup:
-    def __init__(self, lockfile) -> None:
+    def __init__(self, lockfile):
         self.lockfile = lockfile
-
-    # Arguments needed: lockfile
-    def get_region(self):
-        local_headers = {'Authorization': 'Basic ' +
+        self.local_headers = {'Authorization': 'Basic ' +
                          base64.b64encode(('riot:' + self.lockfile['password']).encode()).decode()}
+
+    def get_region(self):
         response = requests.get(
-            f"https://127.0.0.1:{self.lockfile['port']}/product-session/v1/external-sessions", headers=local_headers, verify=False)
+            f"https://127.0.0.1:{self.lockfile['port']}/product-session/v1/external-sessions", headers=self.local_headers, verify=False)
         res_json = response.json()
         return list(res_json.values())[0]['launchConfiguration']['arguments'][3].split("=")[1]
+
+    def get_presence(self, puuid):
+        print("fetching presence")
+        response = requests.get(f"https://127.0.0.1:{self.lockfile['port']}/chat/v4/presences", headers=self.local_headers, verify=False)
+        presences = response.json()
+        for presence in presences['presences']:
+            if presence['puuid'] == puuid:
+                return json.loads(base64.b64decode(presence['private']))
+        
 
     # Arguments needed: lockfile
     def get_headers(self):
         try:
-            local_headers = {'Authorization': 'Basic ' +
-                             base64.b64encode(('riot:' + self.lockfile['password']).encode()).decode()}
             response = requests.get(
-                f"https://127.0.0.1:{self.lockfile['port']}/entitlements/v1/token", headers=local_headers, verify=False)
+                f"https://127.0.0.1:{self.lockfile['port']}/entitlements/v1/token", headers=self.local_headers, verify=False)
             entitlements = response.json()
             puuid = entitlements['subject']
             headers = {
@@ -265,7 +272,6 @@ def get_loadouts(match_id, region, agentUuid):
             return "https://media.valorant-api.com/weaponskinchromas/19629ae1-4996-ae98-7742-24a240d41f99/fullrender.png", "https://media.valorant-api.com/weaponskinchromas/52221ba2-4e4c-ec76-8c81-3483506d5242/fullrender.png"
     except requests.exceptions.RequestException as e:
         raise SystemExit(e)
-
 
 lockfile = GameSetup.get_lockfile()
 headers, puuid = LocalSetup(lockfile=lockfile).get_headers()
