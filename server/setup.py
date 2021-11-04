@@ -53,7 +53,7 @@ class LocalSetup:
         presences = response.json()
         for presence in presences['presences']:
             if presence['puuid'] == puuid:
-                return json.loads(base64.b64decode(presence['private']))
+                return json.loads(base64.b64decode(presence['private']))["sessionLoopState"]
         
 
     # Arguments needed: lockfile
