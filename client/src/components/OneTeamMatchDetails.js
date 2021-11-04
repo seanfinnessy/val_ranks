@@ -34,47 +34,49 @@ const OneTeamMatchDetails = ({ matchDetails }) => {
                     matchDetails.blueTeam.length === 0 ?
                     matchDetails.redTeam.map((player, index) => {
                       return (
-                        <ListItem color="secondary" divider key={index}>
-                        <ListItemAvatar>
-                          <Avatar alt={player.AgentName} src={player.AgentIcon} />
-                        </ListItemAvatar>
-                        <ListItemText inset='true' primary={`${player.GameName} #${player.TagLine}`} />
-                        <ListItemText 
-                          inset='true' 
-                          primary={
-                          <div>
-                            <img src={player.VandalType} style={{width: '200px', height: '50px'}} />
-                            <br/>
-                            <img src={player.PhantomType} style={{width: '200px', height: '50px'}} />
-                            </div> 
-                          } />
-                        <ListItemAvatar>
-                            <Avatar alt={player.RankInfo.CurrentRank} src={player.RankInfo.RankIcon} />
-                            <Typography variant='body2'>{`${player.RankInfo.RankRating} RR`}</Typography>
-                            <Typography variant='body2'>{`${player.RankInfo.WinLossRatio}% Win Rate`}</Typography>
-                        </ListItemAvatar>
-                      </ListItem>
-                      )
-                    }) : matchDetails.blueTeam.map((player, index) => {
-                      return (
-                        <ListItem alignItems="flex-start" color="primary" divider key={index}>
+                        <ListItem color="secondary" divider key={index} className="green-team">
                           <ListItemAvatar>
-                            <Avatar alt={player.AgentName} src={player.AgentIcon} />
-                          </ListItemAvatar>                
-                          <ListItemText  primary={`${player.GameName} #${player.TagLine}`} />
+                          <Avatar alt={player.AgentName} src={player.AgentIcon} />
+                          </ListItemAvatar>
+
+                          <ListItemText primary={`${player.GameName} #${player.TagLine}`} />
                           <ListItemText 
                           inset='true' 
                           primary={
-                          <div>
-                            <img src={player.VandalType} style={{width: '200px', height: '50px'}} />
+                          <div style={{float: 'right', paddingRight: '1.5rem'}}>
+                            <img src={player.VandalType} style={{width: '150px', height: '40px'}} />
                             <br/>
-                            <img src={player.PhantomType} style={{width: '200px', height: '50px'}} />
+                            <img src={player.PhantomType} style={{width: '150px', height: '40px'}} />
                             </div> 
                           } />
                           <ListItemAvatar>
                             <Avatar alt={player.RankInfo.CurrentRank} src={player.RankInfo.RankIcon} />
                             <Typography variant='body2'>{`${player.RankInfo.RankRating} RR`}</Typography>
-                            <Typography variant='body2'>{`${player.RankInfo.WinLossRatio}% Win Rate`}</Typography>
+                            <Typography variant='body2'>{`${player.RankInfo.WinLossRatio}% W/R`}</Typography>
+                        </ListItemAvatar>
+                        </ListItem>
+                      )
+                    }) : matchDetails.blueTeam.map((player, index) => {
+                      return (
+                        <ListItem color="secondary" divider key={index} className="green-team">
+                          <ListItemAvatar>
+                          <Avatar alt={player.AgentName} src={player.AgentIcon} />
+                          </ListItemAvatar>
+
+                          <ListItemText primary={`${player.GameName} #${player.TagLine}`} />
+                          <ListItemText 
+                          inset='true' 
+                          primary={
+                          <div style={{float: 'right', paddingRight: '1.5rem'}}>
+                            <img src={player.VandalType} style={{width: '150px', height: '40px'}} />
+                            <br/>
+                            <img src={player.PhantomType} style={{width: '150px', height: '40px'}} />
+                            </div> 
+                          } />
+                          <ListItemAvatar>
+                            <Avatar alt={player.RankInfo.CurrentRank} src={player.RankInfo.RankIcon} />
+                            <Typography variant='body2'>{`${player.RankInfo.RankRating} RR`}</Typography>
+                            <Typography variant='body2'>{`${player.RankInfo.WinLossRatio}% W/R`}</Typography>
                         </ListItemAvatar>
                         </ListItem>
                       )

@@ -5,7 +5,7 @@ from setup import LobbySetup, GameSetup, LocalSetup, get_latest_season_id, get_l
 from conversions import map_puuids, number_to_ranks
 
 app = Flask(__name__)
-lockfile: dict = {}
+lockfile: dict = {'name': '', 'PID': '', 'port': '', 'password': '', 'protocol': ''}
 headers: dict = {}
 puuid: str = ""
 region: str = ""
@@ -63,7 +63,8 @@ def get_logged_in_user():
     global headers
     global puuid
     global region
-    if lockfile == GameSetup.get_lockfile():
+    new_lockfile = GameSetup.get_lockfile()
+    if lockfile["PID"] == new_lockfile["PID"]:
         player = get_player_name(region, puuid)
         return jsonify({'current_user_name': player["GameName"], 'current_user_tag': player["TagLine"]})
     else:
@@ -84,7 +85,8 @@ def get_match_details():
     global puuid
     global region
     global seasonID
-    if lockfile == GameSetup.get_lockfile():
+    new_lockfile = GameSetup.get_lockfile()
+    if lockfile['PID'] == new_lockfile['PID']:
         match_details = setup_lobby()
         return jsonify(match_details)
     else:

@@ -161,7 +161,7 @@ class LobbySetup:
 def get_latest_season_id(region):
     try:
         response = requests.get(
-            f"https://shared.{region}.a.pvp.net/content-service/v2/content", headers=headers, verify=False)
+            f"https://shared.{region}.a.pvp.net/content-service/v3/content", headers=headers, verify=False)
         content = response.json()
         for season in content["Seasons"]:
             if season["IsActive"]:
@@ -179,7 +179,7 @@ def get_player_mmr(region, player_id, seasonID):
             if r["QueueSkills"]["competitive"]["SeasonalInfoBySeasonID"][seasonID] or r["QueueSkills"]["competitive"]["SeasonalInfoBySeasonID"][seasonID]["NumberOfWinsWithPlacements"] != 0:
                 numberOfWins = r["QueueSkills"]["competitive"]["SeasonalInfoBySeasonID"][seasonID]["NumberOfWinsWithPlacements"]
                 numberOfGames = r["QueueSkills"]["competitive"]["SeasonalInfoBySeasonID"][seasonID]["NumberOfGames"]
-                winPercent = (int(numberOfWins) / int(numberOfGames)) * 100
+                winPercent = round(int(numberOfWins) / int(numberOfGames), 1) * 100
             else:  
                 winPercent = 0
             rankTIER = r["QueueSkills"]["competitive"]["SeasonalInfoBySeasonID"][seasonID]["CompetitiveTier"]
@@ -235,6 +235,7 @@ def get_agent_details(agentUuid):
         raise SystemExit(e)
 
 def get_loadouts(match_id, region, agentUuid):
+    print(match_id, region, agentUuid)
     try:
         response = requests.get(f"https://glz-{region}-1.{region}.a.pvp.net/core-game/v1/matches/{match_id}/loadouts", headers=headers, verify=False)
         if response.ok:
