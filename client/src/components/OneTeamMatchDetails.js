@@ -1,5 +1,5 @@
 import React from 'react'
-import { Typography, List, ListItem, ListItemText, Grid, Paper, ListItemIcon, ListItemAvatar, Avatar, CircularProgress } from '@mui/material'
+import { Typography, List, ListItem, ListItemText, Grid, Paper, ListItemAvatar, Avatar, CircularProgress } from '@mui/material'
 import { connect } from 'react-redux';
 import { flexbox } from '@mui/system';
 
@@ -41,12 +41,12 @@ const OneTeamMatchDetails = ({ matchDetails }) => {
 
                           <ListItemText primary={`${player.GameName} #${player.TagLine}`} />
                           <ListItemText 
-                          inset='true' 
+                          inset
                           primary={
                           <div style={{float: 'right', paddingRight: '1.5rem'}}>
-                            <img src={player.VandalType} style={{width: '150px', height: '40px'}} />
+                            <img alt="Vandal" src={player.VandalType} style={{width: '150px', height: '40px'}} />
                             <br/>
-                            <img src={player.PhantomType} style={{width: '150px', height: '40px'}} />
+                            <img alt="Phantom" src={player.PhantomType} style={{width: '150px', height: '40px'}} />
                             </div> 
                           } />
                           <ListItemAvatar>
@@ -65,12 +65,12 @@ const OneTeamMatchDetails = ({ matchDetails }) => {
 
                           <ListItemText primary={`${player.GameName} #${player.TagLine}`} />
                           <ListItemText 
-                          inset='true' 
+                          inset
                           primary={
                           <div style={{float: 'right', paddingRight: '1.5rem'}}>
-                            <img src={player.VandalType} style={{width: '150px', height: '40px'}} />
+                            <img alt="Vandal" src={player.VandalType} style={{width: '150px', height: '40px'}} />
                             <br/>
-                            <img src={player.PhantomType} style={{width: '150px', height: '40px'}} />
+                            <img alt="Phantom" src={player.PhantomType} style={{width: '150px', height: '40px'}} />
                             </div> 
                           } />
                           <ListItemAvatar>

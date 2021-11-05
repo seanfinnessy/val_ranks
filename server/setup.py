@@ -48,12 +48,11 @@ class LocalSetup:
         return list(res_json.values())[0]['launchConfiguration']['arguments'][3].split("=")[1]
 
     def get_presence(self, puuid):
-        print("fetching presence")
         response = requests.get(f"https://127.0.0.1:{self.lockfile['port']}/chat/v4/presences", headers=self.local_headers, verify=False)
         presences = response.json()
         for presence in presences['presences']:
             if presence['puuid'] == puuid:
-                return json.loads(base64.b64decode(presence['private']))["sessionLoopState"]
+                return json.loads(base64.b64decode(presence['private']))["sessionLoopState"], presence['game_name'], presence['game_tag']
         
 
     # Arguments needed: lockfile
@@ -242,7 +241,6 @@ def get_agent_details(agentUuid):
         raise SystemExit(e)
 
 def get_loadouts(match_id, region, agentUuid):
-    print(match_id, region, agentUuid)
     try:
         response = requests.get(f"https://glz-{region}-1.{region}.a.pvp.net/core-game/v1/matches/{match_id}/loadouts", headers=headers, verify=False)
         if response.ok:
