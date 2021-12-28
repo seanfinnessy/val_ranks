@@ -196,11 +196,14 @@ export const fetchCurrentUser = () => async dispatch => {
 }
 
 export const sockUpdateLobby = (data) => async dispatch => {
+  dispatch({ type: LOADING_CURRENT_USER, loading: true })
   if (data.game_state === "INGAME") {
     console.log("INGAME");
     dispatch({ type: FETCH_MATCH_DETAILS, payload: data.match_details, loading: false, redTeam: data.match_details.red_team_details, blueTeam: data.match_details.blue_team_details, error: false, inGame: true });
   }
   else if (data.game_state === "MENUS") {
+    console.log(data);
+    dispatch({ type: FETCH_MATCH_DETAILS, payload: [], loading: false, redTeam: [], blueTeam: [], error: false, inGame: false });
     console.log('MENUS');
   }
 }

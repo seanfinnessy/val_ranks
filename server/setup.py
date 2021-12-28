@@ -48,11 +48,35 @@ class LocalSetup:
         return list(res_json.values())[0]['launchConfiguration']['arguments'][3].split("=")[1]
 
     def get_presence(self, puuid):
-        response = requests.get(f"https://127.0.0.1:{self.lockfile['port']}/chat/v4/presences", headers=self.local_headers, verify=False)
-        presences = response.json()
-        for presence in presences['presences']:
-            if presence['puuid'] == puuid:
-                return json.loads(base64.b64decode(presence['private']))["sessionLoopState"], presence['game_name'], presence['game_tag']
+        try:
+            current_party: list = []
+            my_party_id: str = ""
+            response = requests.get(f"https://127.0.0.1:{self.lockfile['port']}/chat/v4/presences", headers=self.local_headers, verify=False)
+            presences = response.json()
+
+            for presence in presences['presences']:
+                if presence['puuid'] == puuid:
+                    my_party_id = json.loads(base64.b64decode(presence['private']))["partyId"]
+                    my_name = presence['game_name']
+                    my_tag = presence['game_tag']
+                    game_state = json.loads(base64.b64decode(presence['private']))["sessionLoopState"]
+                    current_party.append({"GameName": presence['game_name'], "GameTag": presence['game_tag'], "PlayerID": presence['puuid'], "LoggedInUser": True})
+
+            for presence in presences['presences']:
+                if "{" not in str(presence['private']) and presence['private'] is not None and presence['private'] != "":
+                    # Get rid of presence for league game.
+                    if json.loads(base64.b64decode(presence['private']))["partyId"] == my_party_id and presence['puuid'] != puuid:
+                        current_party.append({"GameName": presence['game_name'], "GameTag": presence['game_tag'], "PlayerID": presence['puuid'], "LoggedInUser": False})
+        
+            return game_state, my_name, my_tag, current_party
+        except ConnectionRefusedError:
+            print("Having trouble retrieving presence.")
+        except ConnectionAbortedError:
+            print("Having trouble retrieving presence.")
+        except ConnectionError:
+            print("Having trouble retrieving presence.")
+        except urllib3.exceptions.MaxRetryError:
+            print("Requested too many times.")
         
 
     # Arguments needed: lockfile
